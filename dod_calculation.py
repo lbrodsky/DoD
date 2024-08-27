@@ -138,19 +138,22 @@ def main(args):
     c_low = sample_mean - (3 * sigma)
     c_high = sample_mean + (3 * sigma)
 
+
     # Plot image difference
-    # max_int = max(abs(c_low), c_high)
-    # plt.imshow(DoD, vmin=-max_int/1.5, vmax=max_int/1.5, cmap='RdBu')
-    # plt.colorbar()
+    max_int = max(abs(c_low), c_high)
+    plt.imshow(DoD, vmin=-max_int/1.5, vmax=max_int/1.5, cmap='RdBu')
+    plt.colorbar()
 
     # Filter outliers
     msk = np.logical_and(np.logical_or(DoD < c_low, DoD > c_high), np.isfinite(DoD))
     DoD_fil = median_filter(DoD, msk)
+    plt.imshow(msk)
 
     # Plot
-    # plt.imshow(DoD_fil, vmin=-max_int/1.5, vmax=max_int/1.5, cmap='RdBu')
-    # plt.colorbar()
+    plt.imshow(DoD_fil, vmin=-max_int/1.5, vmax=max_int/1.5, cmap='RdBu')
+    plt.colorbar()
     print(f'Median change: {np.nanmedian(DoD_fil)}')
+    print(f'Mean change: {np.nanmean(DoD_fil)}')
 
     # Save DoD to file
     write_imge(DoD_fil, args)
