@@ -37,12 +37,17 @@ def dod(dem1, dem2):
     """
     return dem1 - dem2
 
-def mask_dem(dem, mask_fn):
+def mask_dem(dem, mask_fn, mask_data_fn):
     """Masking DEM
+    mask_fn =  args.mask
+    mask_data_fn = args.mask_data
+    dem = y1_dem
     """
     mask = read_image(mask_fn)
+    mask_data = read_image(mask_data_fn)
+    mask_data = mask_data > 0
 
-    return dem * mask
+    return dem * (mask * mask_data)
 
 def none_treat(dem, ndvs=[-0, -99]):
     """None value tretment.
@@ -86,8 +91,8 @@ def median_filter(data, mask):
 def write_imge(DoD, args):
     """Write resulting DoD image based inputs.
     """
-    tokens1 = os.path.basename(args.year1_dem).split('_')
-    tokens2 = os.path.basename(args.year2_dem).split('_')
+    tokens1 = os.path.basename(args.year2_dem).split('_')
+    tokens2 = os.path.basename(args.year1_dem).split('_')
     file_name = os.path.join(args.dst_dir, '_'.join([tokens1[0], tokens2[1], tokens1[1], 'DoD']) + '.tif')
 
     # geo metadata
@@ -124,9 +129,10 @@ def main(args):
     # Read DEMs
     y1_dem = read_image(args.year1_dem)
     y2_dem = read_image(args.year2_dem)
-    # Masks
-    y1_dem_msk = mask_dem(y1_dem, args.mask1)
-    y2_dem_msk = mask_dem(y2_dem, args.mask1)
+
+    # Masking DEM to common area
+    y1_dem_msk = mask_dem(y1_dem, args.mask, args.mask_data)
+    y2_dem_msk = mask_dem(y2_dem, args.mask, args.mask_data)
 
     # Align Nones
     y1_dem_msk_none = none_treat(y1_dem_msk, ndvs=[-0, -99])
@@ -142,9 +148,9 @@ def main(args):
     c_high = sample_mean + (3 * sigma)
 
     # Plot image difference
-    max_int = max(abs(c_low), c_high)
-    plt.imshow(DoD, vmin=-max_int/1.5, vmax=max_int/1.5, cmap='RdBu')
-    plt.colorbar()
+    # max_int = max(abs(c_low), c_high)
+    # plt.imshow(DoD, vmin=-max_int/1.5, vmax=max_int/1.5, cmap='RdBu')
+    # plt.colorbar()
 
     # Filter outliers
     msk = np.logical_and(np.logical_or(DoD < c_low, DoD > c_high), np.isfinite(DoD))
@@ -153,8 +159,8 @@ def main(args):
     # plt.imshow(msk)
 
     # Plot
-    plt.imshow(DoD_fil, vmin=-max_int/1.5, vmax=max_int/1.5, cmap='RdBu')
-    plt.colorbar()
+    # plt.imshow(DoD_fil, vmin=-max_int/1.5, vmax=max_int/1.5, cmap='RdBu')
+    # plt.colorbar()
     print(f'Median change: {np.nanmedian(DoD_fil)}')
     print(f'Mean change: {np.nanmean(DoD_fil)}')
 
@@ -168,8 +174,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-y1', '--year1_dem', type=str, help='DEM for year 1.')
     parser.add_argument('-y2', '--year2_dem', type=str, help='DEM for year 2.')
-    parser.add_argument('-m1', '--mask1', type=str, help='Mask of glacier for year 1.')
-    parser.add_argument('-m2', '--mask2', type=str, help='Mask of glacier for year 2.')
+    parser.add_argument('-m1', '--mask', type=str, help='Mask of glacier.')
+    parser.add_argument('-m2', '--mask_data', type=str, help='Common mask (intersection of glacier data.')
     parser.add_argument('-d', '--dst_dir', metavar='dst_dir', type=str,
                         help='Target directory where the results are stored.')
     parser.add_argument('-t', '--year_token', type=int, default=1, help='Index of year token.')
@@ -182,15 +188,22 @@ if __name__ == "__main__":
 
     args = Namespace(year1_dem='/Users/lukas/Work/prfuk/clanky/AUC_Special_issue/Belvedere_3D_change/data/DSMs_1m/Belvedere_1951_DEM_1m_ext09.tif',
                      year2_dem='/Users/lukas/Work/prfuk/clanky/AUC_Special_issue/Belvedere_3D_change/data/DSMs_1m/Belvedere_2009_DEM_1m_ext09.tif',
-                     mask1='/Users/lukas/Work/prfuk/clanky/AUC_Special_issue/Belvedere_3D_change/data/DSMs_1m/Belvedere_1951_mask_1m_ext09.tif',
-                     mask2='/Users/lukas/Work/prfuk/clanky/AUC_Special_issue/Belvedere_3D_change/data/DSMs_1m/Belvedere_2015_mask_1m_ext09.tif',
+                     mask='/Users/lukas/Work/prfuk/clanky/AUC_Special_issue/Belvedere_3D_change/data/DSMs_1m/Belvedere_2023_mask_1m_ext09.tif',
+                     mask_data='/Users/lukas/Work/prfuk/clanky/AUC_Special_issue/Belvedere_3D_change/data/DSMs_1m/Belvedere_2023_data_mask_1m_ext23.tif',  
                      dst_dir='/Users/lukas/Work/prfuk/clanky/AUC_Special_issue/Belvedere_3D_change/data/DSMs_1m/DoD')
 
     args = Namespace(year1_dem='/Users/lukas/Work/prfuk/clanky/AUC_Special_issue/Belvedere_3D_change/data/DSMs_1m/Belvedere_2009_DEM_1m_ext09.tif',
                      year2_dem='/Users/lukas/Work/prfuk/clanky/AUC_Special_issue/Belvedere_3D_change/data/DSMs_1m/Belvedere_2023_DEM_1m_ext09.tif',
-                     mask1='/Users/lukas/Work/prfuk/clanky/AUC_Special_issue/Belvedere_3D_change/data/DSMs_1m/Belvedere_2015_mask_1m_ext09.tif',
-                     mask2='/Users/lukas/Work/prfuk/clanky/AUC_Special_issue/Belvedere_3D_change/data/DSMs_1m/Belvedere_2023_mask_1m_ext09.tif', 
+                     mask='/Users/lukas/Work/prfuk/clanky/AUC_Special_issue/Belvedere_3D_change/data/DSMs_1m/Belvedere_2023_mask_1m_ext09.tif',
+                     mask_data='/Users/lukas/Work/prfuk/clanky/AUC_Special_issue/Belvedere_3D_change/data/DSMs_1m/Belvedere_2023_data_mask_1m_ext23.tif',  
                      dst_dir='/Users/lukas/Work/prfuk/clanky/AUC_Special_issue/Belvedere_3D_change/data/DSMs_1m/DoD')
+
+    args = Namespace(year1_dem='/Users/lukas/Work/prfuk/clanky/AUC_Special_issue/Belvedere_3D_change/data/DSMs_1m/Belvedere_1951_DEM_1m_ext09.tif',
+                     year2_dem='/Users/lukas/Work/prfuk/clanky/AUC_Special_issue/Belvedere_3D_change/data/DSMs_1m/Belvedere_2023_DEM_1m_ext09.tif',
+                     mask='/Users/lukas/Work/prfuk/clanky/AUC_Special_issue/Belvedere_3D_change/data/DSMs_1m/Belvedere_2023_mask_1m_ext09.tif',
+                     mask_data='/Users/lukas/Work/prfuk/clanky/AUC_Special_issue/Belvedere_3D_change/data/DSMs_1m/Belvedere_2023_data_mask_1m_ext23.tif',  
+                     dst_dir='/Users/lukas/Work/prfuk/clanky/AUC_Special_issue/Belvedere_3D_change/data/DSMs_1m/DoD')
+
         
     """
 

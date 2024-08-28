@@ -105,6 +105,7 @@ def main(args):
     print(f'Median change: {round(median_change, 2)} m')
 
     # 2. Total Volume Change [m3 x 10^6]
+    # plt.imshow(DoD, vmin=-40, vmax=40, cmap='RdBu')
     dod_area = area(DoD)
     total_volume_change = volume_change(mean_change, dod_area) / 10**6
     indicators['total_volume_change'] = total_volume_change
@@ -158,16 +159,17 @@ if __name__ == "__main__":
         def __init__(self, **kwargs):
             self.__dict__.update(kwargs)
 
-    args = Namespace(dod='/Users/lukas/Work/prfuk/clanky/AUC_Special_issue/Belvedere_3D_change/data/DSMs_1m/DoD/Belvedere_2009_1951_DoD.tif', 
+    args = Namespace(dod='/Users/lukas/Work/prfuk/clanky/AUC_Special_issue/Belvedere_3D_change/data/DSMs_1m/DoD/Belvedere_1951_2009_DoD.tif', 
         year1 = 1951,
-        year2 = 2009 
-    ) 
+        year2 = 2009) 
     
-    args = Namespace(dod='/Users/lukas/Work/prfuk/clanky/AUC_Special_issue/Belvedere_3D_change/data/DSMs_1m/DoD/Belvedere_2023_2009_DoD.tif',  
+    args = Namespace(dod='/Users/lukas/Work/prfuk/clanky/AUC_Special_issue/Belvedere_3D_change/data/DSMs_1m/DoD/Belvedere_2009_2023_DoD.tif',  
         year1 = 2009,
-        year2 = 2023 
-    ) 
+        year2 = 2023) 
 
+    args = Namespace(dod='/Users/lukas/Work/prfuk/clanky/AUC_Special_issue/Belvedere_3D_change/data/DSMs_1m/DoD/Belvedere_1951_2023_DoD.tif',  
+        year1 = 1951,
+        year2 = 2023) 
     
     """
 
