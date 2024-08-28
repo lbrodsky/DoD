@@ -91,7 +91,7 @@ def main(args):
     print('---')
 
     DoD = read_image(args.dod)
-    plt.hist(DoD)
+    # plt.hist(DoD)
 
     indicators = {}
 
@@ -140,6 +140,8 @@ def main(args):
     indicators['annual_mass_balance'] = annual_mass_change_we
     print(f'Annual Mass balance: {round(annual_mass_change_we, 4)} [m w.e. yr-1]')
 
+    print(indicators)
+    print('---')
 
 if __name__ == "__main__":
 
@@ -160,6 +162,13 @@ if __name__ == "__main__":
         year1 = 1951,
         year2 = 2009 
     ) 
+    
+    args = Namespace(dod='/Users/lukas/Work/prfuk/clanky/AUC_Special_issue/Belvedere_3D_change/data/DSMs_1m/DoD/Belvedere_2023_2009_DoD.tif',  
+        year1 = 2009,
+        year2 = 2023 
+    ) 
+
+    
     """
 
     main(args)

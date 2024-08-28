@@ -64,6 +64,7 @@ def median_filter(data, mask):
     for i in range(1, m - 1):
         for j in range(1, n - 1):
             if mask[i, j]:
+                # print(i, j, mask[i, j])
                 # So far only 3x3 kernel
                 temp = [data[i - 1, j - 1],
                         data[i - 1, j],
@@ -74,8 +75,10 @@ def median_filter(data, mask):
                         data[i + 1, j - 1],
                         data[i + 1, j],
                         data[i + 1, j + 1]]
-                temp = sorted(temp)
-                data[i, j] = temp[4]
+                # temp = sorted(temp)
+                # data[i, j] = temp[4]
+                print(temp)
+                data[i, j] = np.nanmedian(np.array(temp))
     print('Finished.')
 
     return data
@@ -138,7 +141,6 @@ def main(args):
     c_low = sample_mean - (3 * sigma)
     c_high = sample_mean + (3 * sigma)
 
-
     # Plot image difference
     max_int = max(abs(c_low), c_high)
     plt.imshow(DoD, vmin=-max_int/1.5, vmax=max_int/1.5, cmap='RdBu')
@@ -146,8 +148,9 @@ def main(args):
 
     # Filter outliers
     msk = np.logical_and(np.logical_or(DoD < c_low, DoD > c_high), np.isfinite(DoD))
+    DoD[msk] = np.nan
     DoD_fil = median_filter(DoD, msk)
-    plt.imshow(msk)
+    # plt.imshow(msk)
 
     # Plot
     plt.imshow(DoD_fil, vmin=-max_int/1.5, vmax=max_int/1.5, cmap='RdBu')
@@ -182,6 +185,13 @@ if __name__ == "__main__":
                      mask1='/Users/lukas/Work/prfuk/clanky/AUC_Special_issue/Belvedere_3D_change/data/DSMs_1m/Belvedere_1951_mask_1m_ext09.tif',
                      mask2='/Users/lukas/Work/prfuk/clanky/AUC_Special_issue/Belvedere_3D_change/data/DSMs_1m/Belvedere_2015_mask_1m_ext09.tif',
                      dst_dir='/Users/lukas/Work/prfuk/clanky/AUC_Special_issue/Belvedere_3D_change/data/DSMs_1m/DoD')
+
+    args = Namespace(year1_dem='/Users/lukas/Work/prfuk/clanky/AUC_Special_issue/Belvedere_3D_change/data/DSMs_1m/Belvedere_2009_DEM_1m_ext09.tif',
+                     year2_dem='/Users/lukas/Work/prfuk/clanky/AUC_Special_issue/Belvedere_3D_change/data/DSMs_1m/Belvedere_2023_DEM_1m_ext09.tif',
+                     mask1='/Users/lukas/Work/prfuk/clanky/AUC_Special_issue/Belvedere_3D_change/data/DSMs_1m/Belvedere_2015_mask_1m_ext09.tif',
+                     mask2='/Users/lukas/Work/prfuk/clanky/AUC_Special_issue/Belvedere_3D_change/data/DSMs_1m/Belvedere_2023_mask_1m_ext09.tif', 
+                     dst_dir='/Users/lukas/Work/prfuk/clanky/AUC_Special_issue/Belvedere_3D_change/data/DSMs_1m/DoD')
+        
     """
 
     main(args)
